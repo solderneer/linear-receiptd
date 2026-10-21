@@ -1,0 +1,2 @@
+# Preserve the upstream font license text verbatim.
+src/linear_receiptd/assets/fonts/LICENSE -whitespace

@@ -1,0 +1,8 @@
+recursive-include src/linear_receiptd/assets *
+recursive-include src/timiniprint/data *.json *.txt
+recursive-include licenses *
+recursive-include examples *.json
+recursive-include tests *.py
+include THIRD_PARTY_NOTICES.md
+include scripts/bootstrap
+recursive-include .github *.yml

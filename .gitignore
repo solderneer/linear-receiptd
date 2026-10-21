@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+.DS_Store
+.env
+.env.*
+work/
+config.json
+secrets.json
+printer.json
+*.sqlite3*
+*.log

@@ -1,0 +1,87 @@
+{
+  "schema": "timiniprint/printer-config/v1",
+  "profile_key": "instaprint_ctp500",
+  "profile_overrides": {
+    "size": 2,
+    "one_length": 8,
+    "dev_dpi": 203,
+    "has_id": false,
+    "use_spp": false,
+    "can_print_label": false,
+    "label_value": "0",
+    "back_paper_num": 0,
+    "protocol_default": {
+      "type": "instaprint_core",
+      "packets_type": "ctp500"
+    },
+    "default_image_pipeline": {
+      "formats": [
+        "bw1"
+      ],
+      "encoding": "instaprint_core_raster"
+    },
+    "stream": {
+      "chunk_size": 20,
+      "delay_ms": 30
+    },
+    "print_defaults": {
+      "energy": {
+        "image": {
+          "low": 0,
+          "middle": 0,
+          "high": 0
+        },
+        "text": {
+          "low": 0,
+          "middle": 0,
+          "high": 0
+        }
+      },
+      "speed": null,
+      "density": {
+        "image": {
+          "low": 12,
+          "middle": 15,
+          "high": 18
+        },
+        "text": {
+          "low": 12,
+          "middle": 15,
+          "high": 18
+        }
+      }
+    },
+    "paper_presets": [
+      {
+        "key": "plain_384r",
+        "label": "Plain roll",
+        "paper_width_px": 384,
+        "render_width_px": 384,
+        "render_height_px": null,
+        "paper_mode": "plain",
+        "left_padding_px": 0,
+        "top_padding_px": 0,
+        "max_height_px": null,
+        "raster_height_px": null,
+        "mirror_horizontal": false,
+        "rotation_degrees": 0,
+        "dither_mode": null,
+        "render_height_scale": 1.0
+      }
+    ],
+    "default_paper_preset_key": null,
+    "ble_mtu_request": 512,
+    "post_print_feed_count": 0,
+    "a4xii": false
+  },
+  "runtime_overrides": {
+    "control_algorithm": null,
+    "preset_key": null,
+    "density": null,
+    "capabilities": {
+      "d2_status": false,
+      "didian_status": false
+    }
+  },
+  "model_key": "instaprint_ctp500_coreprint"
+}

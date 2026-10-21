@@ -1,0 +1,17 @@
+{
+  "id": "example-issue",
+  "identifier": "DEMO-123",
+  "title": "Make something worth printing",
+  "state": {
+    "name": "In Progress"
+  },
+  "priority": 2,
+  "project": {
+    "name": "Example project"
+  },
+  "description": "## Acceptance criteria\n\n- Render the full ticket\n- Print once for each assignment\n- Include a QR code for the latest details",
+  "url": "https://linear.app",
+  "assignee": {
+    "name": "Example User"
+  }
+}

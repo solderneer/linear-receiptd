@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+set -eu
+cd "$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+PYTHON_BIN=${PYTHON_BIN:-python3}
+"$PYTHON_BIN" -c 'import sys; sys.exit("Python 3.11 or newer is required" if sys.version_info < (3, 11) else 0)'
+"$PYTHON_BIN" -m venv .venv
+.venv/bin/python -m pip install --upgrade pip
+.venv/bin/python -m pip install -e '.[dev]'
+printf '\nInstalled. Activate with: . .venv/bin/activate\nThen: linear-receiptd scan\n'
