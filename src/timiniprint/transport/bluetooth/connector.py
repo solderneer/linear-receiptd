@@ -157,6 +157,10 @@ class BleakBluetoothConnection:
             self._device.profile.stream.delay_ms,
         )
 
+    async def check_connection(self) -> bool:
+        """Refresh transport liveness without sending printer payloads."""
+        return await self._backend.check_connection()
+
     async def disconnect(self) -> None:
         """Close the underlying Bluetooth backend connection."""
         await self._backend.disconnect()

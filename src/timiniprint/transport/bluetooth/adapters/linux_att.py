@@ -198,6 +198,10 @@ class _LinuxAttSocket:
             self.close()
             raise
 
+    def check_connection(self) -> bool:
+        """Use the direct ATT receiver's state without writing any packets."""
+        return bool(self._connected and self._client is not None and self._client.is_connected)
+
     def send(self, data: bytes) -> int:
         return self.send_payload(data)
 
@@ -446,6 +450,14 @@ class _LinuxAttClient:
                 last_error = exc
                 self.close()
         raise RuntimeError(f"direct ATT connect failed: {last_error}")
+
+    @property
+    def is_connected(self) -> bool:
+        if self._sock is None:
+            return False
+        # A subscribed connection has a receive thread which observes link
+        # loss. Unsubscribed clients have no background receiver to consult.
+        return self._rx_thread is None or self._running and self._rx_thread.is_alive()
 
     def close(self) -> None:
         self._running = False
@@ -706,6 +718,8 @@ class _LinuxAttClient:
                         continue
                     del self._response_queue[index]
                     return result
+                if not self._running:
+                    raise ConnectionError("ATT link disconnected while waiting for a response")
                 remaining = end_at - _monotonic_seconds()
                 if remaining <= 0:
                     raise TimeoutError("Timed out waiting for ATT response")
@@ -752,21 +766,24 @@ class _LinuxAttClient:
         self._rx_thread.start()
 
     def _rx_loop(self) -> None:
-        while self._running and self._sock is not None:
-            try:
-                pdu = self._recv_pdu(timeout=0.5)
-            except TimeoutError:
-                continue
-            except OSError:
-                break
-            except Exception:
-                break
-            if not pdu:
-                continue
-            if self._dispatch_async_pdu(pdu):
-                continue
+        try:
+            while self._running and self._sock is not None:
+                try:
+                    pdu = self._recv_pdu(timeout=0.5)
+                except TimeoutError:
+                    continue
+                except Exception:
+                    break
+                if not pdu:
+                    break
+                if self._dispatch_async_pdu(pdu):
+                    continue
+                with self._condition:
+                    self._response_queue.append(pdu)
+                    self._condition.notify_all()
+        finally:
             with self._condition:
-                self._response_queue.append(pdu)
+                self._running = False
                 self._condition.notify_all()
 
     def _dispatch_async_pdu(self, pdu: bytes) -> bool:

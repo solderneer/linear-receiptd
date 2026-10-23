@@ -155,6 +155,19 @@ class SppBackend:
                 self._reporter.warning(short="Connection cleanup failed", detail=str(exc))
             raise
 
+    async def check_connection(self) -> bool:
+        """Observe the active adapter on its serialized executor path."""
+        return await self._run_blocking(self._check_connection_blocking)
+
+    def _check_connection_blocking(self) -> bool:
+        with self._lock:
+            if not self._connected or self._sock is None:
+                return False
+            check = getattr(self._sock, "check_connection", None)
+            if callable(check) and not check():
+                self._connected = False
+            return self._connected
+
     def is_connected(self) -> bool:
         return self._connected
 

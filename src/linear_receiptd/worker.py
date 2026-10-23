@@ -47,8 +47,17 @@ class Printer:
         return job.payload
 
     async def connect(self):
+        if self.connection is not None:
+            try:
+                live = await self.connection.check_connection()
+            except Exception:
+                live = False
+            if not live:
+                log.info("BLE link disconnected; reconnecting before any print writes")
+                await self.close()
         if self.connection is None:
             self.connection = await self.connector.connect(self.device)
+            log.info("BLE printer connected; keeping link open between jobs")
 
     async def send(self, payload):
         from .sender import send_job_slowly
@@ -122,7 +131,7 @@ async def process_one(queue, settings, linear, printer, stop):
         queue.update(job_id, status="uncertain", error="Transfer interrupted; inspect paper before reprinting")
         queue.pause()
         await printer.close()
-        log.error("Job %s may be partially printed; queue paused", job_id)
+        log.error("Job %s may be partially printed; queue paused: %s: %s", job_id, type(error).__name__, error)
         if isinstance(error, Exception):
             raise TransferUncertain(f"Interrupted job {job_id}") from error
         raise
@@ -133,8 +142,27 @@ async def process_one(queue, settings, linear, printer, stop):
 
 async def run_worker(queue, settings, linear, printer, stop):
     queue.recover()
+    next_connection_check = 0.0
+    connection_available = False
     try:
         while not stop.is_set():
+            if time.monotonic() >= next_connection_check:
+                try:
+                    await printer.connect()
+                    connection_available = True
+                    next_connection_check = time.monotonic() + 5
+                except Exception as error:
+                    connection_available = False
+                    next_connection_check = time.monotonic() + 15
+                    log.warning("BLE printer unavailable; reconnecting in 15s: %s: %s", type(error).__name__, error)
+            if not connection_available or stop.is_set():
+                if stop.is_set():
+                    break
+                try:
+                    await asyncio.wait_for(stop.wait(), timeout=1)
+                except TimeoutError:
+                    pass
+                continue
             try:
                 processed = await process_one(queue, settings, linear, printer, stop)
             except TransferUncertain:

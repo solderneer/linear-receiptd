@@ -13,6 +13,9 @@ The snapshot includes these local changes, retained from the working printer:
 - Support an explicit GATT write-response policy for standard writes.
 - Recover the negotiated Linux payload limit from the public Bleak
   characteristic property when BlueZ's client MTU reports its default.
+- Expose a passive connection-health check, pump idle Bleak disconnect
+  callbacks, and mark direct ATT EOF/errors disconnected so response waiters
+  fail promptly rather than retaining a stale connection.
 
 Regression tests for these changes are in `tests/vendor`. Keep the snapshot
 and its fixes together when updating upstream; this repository needs no

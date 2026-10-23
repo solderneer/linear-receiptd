@@ -237,7 +237,11 @@ receipt after a power loss or broken connection.
 
 The retained default uses 180-byte acknowledged BLE writes with 10 ms pacing,
 a 0.5-second initialization pause, and a passive 30-second drain. It keeps the
-link open between jobs. This profile produced complete clean full receipts on
+link open between jobs, checks idle transport liveness every five seconds, and
+reconnects if the printer drops the link. Connection attempts continue while
+the queue is paused; offline attempts retry after 15 seconds. These checks
+observe transport state and process OS callbacks without sending printer
+payloads. A lost saved connection is replaced before any print writes. This profile produced complete clean full receipts on
 the original Linux setup, though paper movement sometimes stuttered. A GATT
 response is not a printer completion acknowledgement. Larger 480-byte writes
 and sustained unpaced full receipts corrupted content in testing; the small

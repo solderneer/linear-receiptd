@@ -222,6 +222,15 @@ class _BleakSocket:
             preferred_write_char_uuid=transport.preferred_write_char_uuid,
         )
 
+    def check_connection(self) -> bool:
+        """Pump pending disconnect callbacks and inspect Bleak's live state."""
+        if not self._connected or self._client is None or self._loop is None:
+            return False
+        # This adapter's loop normally runs only during I/O. Give already
+        # pending OS callbacks a turn while idle; no GATT requests are sent.
+        self._loop.run_until_complete(asyncio.sleep(0.05))
+        return bool(self._client.is_connected)
+
     def send(self, data: bytes) -> int:
         return self.send_payload(data)
 
